@@ -38,7 +38,7 @@ resource "aws_ecs_task_definition" "main" {
   container_definitions = jsonencode([
     {
       name  = "${var.app_name}-container"
-      image = "${var.docker_username}/koronet-web-app:latest"
+      image = "${data.aws_caller_identity.current.account_id}.dkr.ecr.${var.aws_region}.amazonaws.com/${aws_ecr_repository.main.name}:latest"
       
       portMappings = [
         {
@@ -51,7 +51,7 @@ resource "aws_ecs_task_definition" "main" {
       environment = [
         {
           name  = "DB_HOST"
-          value = aws_db_instance.main.endpoint
+          value = split(":", aws_db_instance.main.endpoint)[0]
         },
         {
           name  = "DB_PORT"
@@ -144,17 +144,17 @@ resource "aws_ecs_service" "main" {
 
   network_configuration {
     security_groups  = [aws_security_group.ecs_tasks.id]
-    subnets          = aws_subnet.private[*].id
-    assign_public_ip = false
+    subnets          = aws_subnet.public[*].id
+    assign_public_ip = true
   }
 
-  load_balancer {
-    target_group_arn = aws_lb_target_group.main.arn
-    container_name   = "${var.app_name}-container"
-    container_port   = var.app_port
-  }
+  # load_balancer {
+  #   target_group_arn = aws_lb_target_group.main.arn
+  #   container_name   = "${var.app_name}-container"
+  #   container_port   = var.app_port
+  # }
 
-  depends_on = [aws_lb_listener.main, aws_iam_role_policy_attachment.ecs_execution_role_policy]
+  depends_on = [aws_iam_role_policy_attachment.ecs_execution_role_policy]
 
   tags = {
     Name = "${var.app_name}-service"
