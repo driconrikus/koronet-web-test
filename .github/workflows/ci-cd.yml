@@ -121,25 +121,25 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ secrets.AWS_REGION }}
 
-    - name: Log in to Docker Hub
-      uses: docker/login-action@v3
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
 
-    - name: Build, tag, and push image to Docker Hub
+    - name: Build, tag, and push image to Amazon ECR
       id: build-image
       env:
-        DOCKER_REPOSITORY: ${{ secrets.DOCKER_USERNAME }}/koronet-web-app
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: koronet-web-app
         IMAGE_TAG: ${{ github.sha }}
       run: |
-        docker build -t $DOCKER_REPOSITORY:$IMAGE_TAG .
-        docker push $DOCKER_REPOSITORY:$IMAGE_TAG
-        echo "image=$DOCKER_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
     - name: Deploy to Amazon ECS
       env:
-        DOCKER_REPOSITORY: ${{ secrets.DOCKER_USERNAME }}/koronet-web-app
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: koronet-web-app
         IMAGE_TAG: ${{ github.sha }}
         ECS_SERVICE: koronet-web-service
         ECS_CLUSTER: koronet-cluster
@@ -151,7 +151,7 @@ jobs:
         aws ecs describe-task-definition --task-definition $ECS_TASK_DEFINITION --query 'taskDefinition.containerDefinitions[0].image' > current-image.json
         
         # Update the image in the task definition
-        sed -i "s|$(cat current-image.json)|$DOCKER_REPOSITORY:$IMAGE_TAG|g" task-definition.json
+        sed -i "s|$(cat current-image.json)|$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|g" task-definition.json
         
         # Remove unwanted fields and create new task definition
         jq 'del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .placementConstraints, .compatibilities, .registeredAt, .registeredBy)' task-definition.json > new-task-definition.json
