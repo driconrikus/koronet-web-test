@@ -11,7 +11,7 @@ This project implements a modern, scalable web application with the following co
 - **Cache**: Redis for high-performance caching
 - **Containerization**: Docker with optimized multi-stage builds
 - **Orchestration**: Docker Compose for local development
-- **CI/CD**: GitHub Actions for automated testing and deployment to Docker Hub
+- **CI/CD**: GitHub Actions for automated testing and deployment to ECR
 - **Infrastructure**: AWS ECS with Terraform IaC
 - **Monitoring**: Prometheus, Grafana, and CloudWatch integration
 
@@ -112,7 +112,7 @@ koronet-web-test/
 - ✅ Application Load Balancer
 - ✅ RDS PostgreSQL with encryption
 - ✅ ElastiCache Redis cluster
-- ✅ Docker Hub integration for container images
+- ✅ ECR repository with lifecycle policies
 - ✅ CloudWatch monitoring and alerting
 - ✅ Secrets Manager for credentials
 
