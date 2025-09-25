@@ -34,7 +34,7 @@ resource "aws_db_instance" "main" {
 
   # Engine
   engine         = "postgres"
-  engine_version = "15.4"
+  # engine_version = "13.7"  # Let AWS choose the default version
   instance_class = var.db_instance_class
 
   # Storage
