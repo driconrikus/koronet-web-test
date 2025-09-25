@@ -1,7 +1,7 @@
 variable "aws_region" {
   description = "AWS region"
   type        = string
-  default     = "us-west-2"
+  default     = "us-east-1"
 }
 
 variable "environment" {
@@ -76,8 +76,3 @@ variable "redis_node_type" {
   default     = "cache.t3.micro"
 }
 
-variable "docker_username" {
-  description = "Docker Hub username for container images"
-  type        = string
-  default     = "your-dockerhub-username"
-}

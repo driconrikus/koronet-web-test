@@ -8,10 +8,9 @@ terraform {
   }
   
   backend "s3" {
-    # Configure your S3 backend here
-    # bucket = "your-terraform-state-bucket"
-    # key    = "koronet/terraform.tfstate"
-    # region = "us-west-2"
+     bucket = "koronet-terraform-state"
+     key    = "koronet/terraform.tfstate"
+     region = "us-east-1"
   }
 }
 
@@ -20,7 +19,7 @@ provider "aws" {
   
   default_tags {
     tags = {
-      Project     = "koronet-web-app"
+      Project     = "koronet-web-server"
       Environment = var.environment
       ManagedBy   = "terraform"
     }

@@ -53,50 +53,6 @@ resource "aws_cloudwatch_metric_alarm" "high_memory" {
   }
 }
 
-resource "aws_cloudwatch_metric_alarm" "target_response_time" {
-  alarm_name          = "${var.app_name}-high-response-time"
-  comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = "3"
-  metric_name         = "TargetResponseTime"
-  namespace           = "AWS/ApplicationELB"
-  period              = "300"
-  statistic           = "Average"
-  threshold           = "2"
-  alarm_description   = "This metric monitors application response time"
-  alarm_actions       = [aws_sns_topic.alerts.arn]
-
-  dimensions = {
-    TargetGroup  = aws_lb_target_group.main.arn_suffix
-    LoadBalancer = aws_lb.main.arn_suffix
-  }
-
-  tags = {
-    Name = "${var.app_name}-high-response-time-alarm"
-  }
-}
-
-resource "aws_cloudwatch_metric_alarm" "http_5xx_errors" {
-  alarm_name          = "${var.app_name}-http-5xx-errors"
-  comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = "2"
-  metric_name         = "HTTPCode_Target_5XX_Count"
-  namespace           = "AWS/ApplicationELB"
-  period              = "300"
-  statistic           = "Sum"
-  threshold           = "10"
-  alarm_description   = "This metric monitors HTTP 5XX errors"
-  alarm_actions       = [aws_sns_topic.alerts.arn]
-
-  dimensions = {
-    TargetGroup  = aws_lb_target_group.main.arn_suffix
-    LoadBalancer = aws_lb.main.arn_suffix
-  }
-
-  tags = {
-    Name = "${var.app_name}-http-5xx-errors-alarm"
-  }
-}
-
 # SNS Topic for Alerts
 resource "aws_sns_topic" "alerts" {
   name = "${var.app_name}-alerts"
@@ -138,28 +94,29 @@ resource "aws_cloudwatch_dashboard" "main" {
           period  = 300
         }
       },
-      {
-        type   = "metric"
-        x      = 0
-        y      = 6
-        width  = 12
-        height = 6
+      # Load balancer metrics commented out due to account limitations
+      # {
+      #   type   = "metric"
+      #   x      = 0
+      #   y      = 6
+      #   width  = 12
+      #   height = 6
 
-        properties = {
-          metrics = [
-            ["AWS/ApplicationELB", "TargetResponseTime", "TargetGroup", aws_lb_target_group.main.arn_suffix, "LoadBalancer", aws_lb.main.arn_suffix],
-            [".", "RequestCount", ".", ".", ".", "."],
-            [".", "HTTPCode_Target_2XX_Count", ".", ".", ".", "."],
-            [".", "HTTPCode_Target_4XX_Count", ".", ".", ".", "."],
-            [".", "HTTPCode_Target_5XX_Count", ".", ".", ".", "."]
-          ]
-          view    = "timeSeries"
-          stacked = false
-          region  = var.aws_region
-          title   = "Application Load Balancer Metrics"
-          period  = 300
-        }
-      },
+      #   properties = {
+      #     metrics = [
+      #       ["AWS/ApplicationELB", "TargetResponseTime", "TargetGroup", aws_lb_target_group.main.arn_suffix, "LoadBalancer", aws_lb.main.arn_suffix],
+      #       [".", "RequestCount", ".", ".", ".", "."],
+      #       [".", "HTTPCode_Target_2XX_Count", ".", ".", ".", "."],
+      #       [".", "HTTPCode_Target_4XX_Count", ".", ".", ".", "."],
+      #       [".", "HTTPCode_Target_5XX_Count", ".", ".", ".", "."]
+      #     ]
+      #     view    = "timeSeries"
+      #     stacked = false
+      #     region  = var.aws_region
+      #     title   = "Application Load Balancer Metrics"
+      #     period  = 300
+      #   }
+      # },
       {
         type   = "metric"
         x      = 0

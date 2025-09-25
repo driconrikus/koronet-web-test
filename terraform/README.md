@@ -10,7 +10,7 @@ The infrastructure includes:
 - **Application Load Balancer** for traffic distribution
 - **RDS PostgreSQL** database with encryption and backups
 - **ElastiCache Redis** cluster for caching
-- **Docker Hub** for container images
+- **ECR** repository for container images
 - **CloudWatch** monitoring and alerting
 - **Secrets Manager** for secure credential storage
 
@@ -28,7 +28,7 @@ Your AWS credentials need the following permissions:
 - VPC (VPC, subnets, security groups, NAT gateways)
 - RDS (instances, subnet groups, parameter groups)
 - ElastiCache (replication groups, subnet groups)
-- Docker Hub access
+- ECR (repositories, lifecycle policies)
 - IAM (roles, policies, policy attachments)
 - CloudWatch (log groups, alarms, dashboards)
 - Secrets Manager (secrets, versions)
@@ -70,28 +70,31 @@ terraform apply
 
 ### 5. Build and Push Docker Image
 
-After infrastructure is deployed, you can build and push your Docker image to Docker Hub:
+After infrastructure is deployed, get the ECR repository URL from outputs:
 
 ```bash
-# Login to Docker Hub
-docker login --username your-dockerhub-username
+terraform output ecr_repository_url
+```
+
+Then build and push your Docker image:
+
+```bash
+# Get login token
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin <ECR_REPOSITORY_URL>
 
 # Build image
 docker build -t koronet-web-app .
 
 # Tag image
-docker tag koronet-web-app:latest your-dockerhub-username/koronet-web-app:latest
+docker tag koronet-web-app:latest <ECR_REPOSITORY_URL>:latest
 
 # Push image
-docker push your-dockerhub-username/koronet-web-app:latest
+docker push <ECR_REPOSITORY_URL>:latest
 ```
 
 Or use the automated deployment script:
 
 ```bash
-# Set Docker Hub credentials
-export DOCKER_PASSWORD=your-dockerhub-password
-
 # Run deployment script
 ./deploy.sh
 ```
@@ -117,7 +120,6 @@ Key variables you can customize in `variables.tf`:
 - `desired_count`: Desired number of tasks (default: 2)
 - `db_instance_class`: RDS instance class (default: db.t3.micro)
 - `redis_node_type`: ElastiCache node type (default: cache.t3.micro)
-- `docker_username`: Docker Hub username (default: your-dockerhub-username)
 
 ### Customization
 

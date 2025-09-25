@@ -33,15 +33,16 @@ output "ecs_service_name" {
   value       = aws_ecs_service.main.name
 }
 
-output "load_balancer_dns_name" {
-  description = "DNS name of the load balancer"
-  value       = aws_lb.main.dns_name
-}
+# Load balancer outputs commented out due to account limitations
+# output "load_balancer_dns_name" {
+#   description = "DNS name of the load balancer"
+#   value       = aws_lb.main.dns_name
+# }
 
-output "load_balancer_zone_id" {
-  description = "Zone ID of the load balancer"
-  value       = aws_lb.main.zone_id
-}
+# output "load_balancer_zone_id" {
+#   description = "Zone ID of the load balancer"
+#   value       = aws_lb.main.zone_id
+# }
 
 output "rds_endpoint" {
   description = "RDS instance endpoint"
@@ -65,9 +66,9 @@ output "redis_port" {
   value       = aws_elasticache_replication_group.redis.port
 }
 
-output "docker_hub_repository" {
-  description = "Docker Hub repository URL"
-  value       = "${var.docker_username}/koronet-web-app"
+output "ecr_repository_url" {
+  description = "URL of the ECR repository"
+  value       = aws_ecr_repository.main.repository_url
 }
 
 output "secrets_manager_secret_arn" {

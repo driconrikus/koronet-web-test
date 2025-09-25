@@ -10,7 +10,7 @@ resource "aws_elasticache_subnet_group" "main" {
 
 # ElastiCache Parameter Group
 resource "aws_elasticache_parameter_group" "main" {
-  family = "redis7.x"
+  family = "redis7"
   name   = "${var.app_name}-cache-params"
 
   parameter {
@@ -66,7 +66,7 @@ resource "aws_elasticache_replication_group" "redis" {
 # Random auth token for Redis
 resource "random_password" "redis_auth_token" {
   length  = 32
-  special = true
+  special = false
 }
 
 # CloudWatch Log Group for Redis slow log

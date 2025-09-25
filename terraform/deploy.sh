@@ -10,9 +10,8 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Configuration
-AWS_REGION="us-west-2"
-DOCKER_USERNAME=""
-DOCKER_REPOSITORY=""
+AWS_REGION="us-east-1"
+ECR_REPOSITORY=""
 IMAGE_TAG="latest"
 
 # Functions
@@ -78,25 +77,24 @@ apply_terraform() {
 
 get_outputs() {
     log_info "Getting Terraform outputs..."
-    DOCKER_USERNAME=$(terraform output -raw docker_hub_repository | cut -d'/' -f1)
-    DOCKER_REPOSITORY=$(terraform output -raw docker_hub_repository)
-    log_info "Docker Repository: $DOCKER_REPOSITORY"
+    ECR_REPOSITORY=$(terraform output -raw ecr_repository_url)
+    log_info "ECR Repository: $ECR_REPOSITORY"
 }
 
 build_and_push_image() {
     log_info "Building and pushing Docker image..."
     
-    # Login to Docker Hub
-    echo "$DOCKER_PASSWORD" | docker login --username $DOCKER_USERNAME --password-stdin
+    # Login to ECR
+    aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPOSITORY
     
     # Build image
     docker build -t koronet-web-app .
     
     # Tag image
-    docker tag koronet-web-app:latest $DOCKER_REPOSITORY:$IMAGE_TAG
+    docker tag koronet-web-app:latest $ECR_REPOSITORY:$IMAGE_TAG
     
     # Push image
-    docker push $DOCKER_REPOSITORY:$IMAGE_TAG
+    docker push $ECR_REPOSITORY:$IMAGE_TAG
     
     log_info "Docker image pushed successfully!"
 }
@@ -202,11 +200,6 @@ main() {
     
     # Build and push Docker image
     if [[ "$SKIP_DOCKER" != "true" ]]; then
-        # Check for Docker Hub credentials
-        if [[ -z "$DOCKER_PASSWORD" ]]; then
-            log_error "DOCKER_PASSWORD environment variable is required for Docker Hub push"
-            exit 1
-        fi
         build_and_push_image
     else
         log_warn "Skipping Docker build and push"
