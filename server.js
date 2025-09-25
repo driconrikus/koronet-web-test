@@ -26,8 +26,7 @@ const pool = new Pool({
 
 // Redis connection
 const redisClient = redis.createClient({
-  host: process.env.REDIS_HOST || 'redis',
-  port: process.env.REDIS_PORT || 6379,
+  url: `redis://${process.env.REDIS_HOST || 'redis'}:${process.env.REDIS_PORT || 6379}`,
   password: process.env.REDIS_PASSWORD || undefined,
 });
 
