@@ -1,0 +1,30 @@
+# Terraform Variables Configuration
+# Copy this file to terraform.tfvars and update the values
+
+# AWS Configuration
+aws_region = "us-west-2"
+environment = "production"
+
+# Application Configuration
+app_name = "koronet-web"
+app_port = 3000
+
+# Container Configuration
+container_cpu = 256
+container_memory = 512
+
+# Scaling Configuration
+desired_count = 2
+min_capacity = 1
+max_capacity = 10
+
+# Database Configuration
+db_instance_class = "db.t3.micro"
+db_allocated_storage = 20
+db_username = "postgres"
+
+# Redis Configuration
+redis_node_type = "cache.t3.micro"
+
+# Docker Hub Configuration
+docker_username = "your-dockerhub-username"  # Replace with your actual Docker Hub username
